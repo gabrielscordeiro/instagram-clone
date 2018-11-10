@@ -1,3 +1,6 @@
-/node_modules
+api/node_modules
+cliente_web_instagram_clone/node_modules
 /nbproject/private/
 /nbproject
+api/yarn.lock
+cliente_web_instagram_clone/yarn.lock

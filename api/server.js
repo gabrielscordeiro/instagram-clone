@@ -2,11 +2,13 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const mongodb = require('mongodb');
 const objectId = require('mongodb').ObjectId;
+const multiparty = require('connect-multiparty');
 
 const app = express();
 
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json());
+app.use(multiparty());
 
 const port = 8080;
 
@@ -29,7 +31,14 @@ app.get('/', function (req, res) {
 });
 
 app.post('/api', function (req, res) {
+    //res.setHeader('Access-Control-Allow-Origin', 'http://localhost:8000');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+
     let dados = req.body;
+
+    console.log(dados);
+
+    return;
 
     db.open(function (err, mongoclient) {
         mongoclient.collection('postagens', function (err, collection) {
