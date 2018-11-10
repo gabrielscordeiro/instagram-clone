@@ -39,7 +39,7 @@ app.post('/api', function (req, res) {
                 } else {
                     res.json(response);
                 }
-                
+
                 mongoclient.close();
             });
         })
@@ -88,8 +88,27 @@ app.put('/api/:id', function (req, res) {
                     $set: {
                         titulo: req.body.titulo
                     }
-            }, {},
-            function (err, response) {
+                }, {},
+                function (err, response) {
+                    if (err) {
+                        res.json(err);
+                    } else {
+                        res.json(response);
+                    }
+
+                    mongoclient.close();
+                });
+        })
+    })
+});
+
+//Delete by ID
+app.delete('/api/:id', function (req, res) {
+    db.open(function (err, mongoclient) {
+        mongoclient.collection('postagens', function (err, collection) {
+            collection.remove({
+                _id: objectId(req.params.id)
+            }, function (err, response) {
                 if (err) {
                     res.json(err);
                 } else {
