@@ -18,6 +18,31 @@
 	<script>
 		$(document).ready(function () {
 
+			function loadPosts() {
+				let xhr = new XMLHttpRequest();
+
+				xhr.open('GET', 'http://localhost:8080/api');
+
+				xhr.onload = function () {
+					if (xhr.status == 200) {
+						var data = $.parseJSON(xhr.responseText);
+						
+						for(i = 0; i < data.length; i++){
+							$('#container_timeline').append(
+								'<div class="publicacao">' + 
+									'<span class="titulo">' + data[i].titulo + '</span>' +
+									'<img src="http://localhost:8080/imagens/'+ data[i].urlImagem + '"/>' + 
+								'</div>'
+							)
+						}
+					}
+				}
+
+				xhr.send();
+			}
+
+			loadPosts();
+
 			$('#btn_incluir').click(function () {
 				$('#container_timeline').hide();
 				$('#container_form').show();
@@ -38,16 +63,16 @@
 				formData.append('titulo', titulo);
 
 				let xhr = new XMLHttpRequest();
-				
-				xhr.onreadystatechange = function(){
-					if(xhr.readyState == 4){
+
+				xhr.onreadystatechange = function () {
+					if (xhr.readyState == 4) {
 						let response = xhr.responseText;
 
 						$('#mensagem').html(response);
 					}
 				}
 
-				xhr.open('POST','http://localhost:8080/api');
+				xhr.open('POST', 'http://localhost:8080/api');
 				xhr.send(formData);
 			});
 

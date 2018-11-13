@@ -4,6 +4,7 @@ const mongodb = require('mongodb');
 const objectId = require('mongodb').ObjectId;
 const multiparty = require('connect-multiparty');
 const mv = require('mv');
+const fs = require('fs');
 
 const app = express();
 
@@ -73,6 +74,8 @@ app.post('/api', function (req, res) {
 });
 
 app.get('/api', function (req, res) {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+
     db.open(function (err, mongoclient) {
         mongoclient.collection('postagens', function (err, collection) {
             collection.find().toArray(function (err, response) {
@@ -103,6 +106,24 @@ app.get('/api/:id', function (req, res) {
             });
         })
     })
+});
+
+
+app.get('/imagens/:imagem', function (req, res) {
+    let img = req.params.imagem;
+
+    fs.readFile(`./uploads/${img}`, function (err, response) {
+        if (err) {
+            res.status(400).json(err)
+            return;
+        } else {
+            res.writeHead(200, {
+                'content-type':'image/jpg'
+            });
+
+            res.end(response);
+        }
+    });
 });
 
 app.put('/api/:id', function (req, res) {
@@ -149,23 +170,23 @@ app.delete('/api/:id', function (req, res) {
 
 function getDateTime() {
     let date = new Date();
-    
+
     let hour = date.getHours();
-    hour = (hour < 10 ? "0" : "") + hour; 
-    
-    let min  = date.getMinutes();
+    hour = (hour < 10 ? "0" : "") + hour;
+
+    let min = date.getMinutes();
     min = (min < 10 ? "0" : "") + min;
-    
-    let sec  = date.getSeconds();
+
+    let sec = date.getSeconds();
     sec = (sec < 10 ? "0" : "") + sec;
-    
+
     let year = date.getFullYear();
-    
+
     let month = date.getMonth() + 1;
     month = (month < 10 ? "0" : "") + month;
-    
-    let day  = date.getDate();
+
+    let day = date.getDate();
     day = (day < 10 ? "0" : "") + day;
-    
+
     return `hora-${hour}-${min}-${sec}-dia-${day}-${month}-${year}-`;
 }
