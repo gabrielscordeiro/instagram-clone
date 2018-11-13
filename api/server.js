@@ -3,6 +3,7 @@ const bodyParser = require('body-parser');
 const mongodb = require('mongodb');
 const objectId = require('mongodb').ObjectId;
 const multiparty = require('connect-multiparty');
+const mv = require('mv');
 
 const app = express();
 
@@ -34,25 +35,41 @@ app.post('/api', function (req, res) {
     //res.setHeader('Access-Control-Allow-Origin', 'http://localhost:8000');
     res.setHeader('Access-Control-Allow-Origin', '*');
 
-    let dados = req.body;
+    let files = req.files;
 
-    console.log(dados);
+    let pathOrigem = files.arquivo.path;
+    let pathDestino = `./uploads/${getDateTime() + files.arquivo.originalFilename}`;
+    let urlImagem = files.arquivo.originalFilename;
 
-    return;
-
-    db.open(function (err, mongoclient) {
-        mongoclient.collection('postagens', function (err, collection) {
-            collection.insert(dados, function (err, response) {
-                if (err) {
-                    res.json(err);
-                } else {
-                    res.json(response);
-                }
-
-                mongoclient.close();
+    mv(pathOrigem, pathDestino, function (err) {
+        if (err) {
+            res.status(500).json({
+                error: err
             });
+            return;
+        }
+
+        let dados = {
+            urlImagem: urlImagem,
+            titulo: req.body.titulo
+        }
+
+        console.log(dados);
+
+        db.open(function (err, mongoclient) {
+            mongoclient.collection('postagens', function (err, collection) {
+                collection.insert(dados, function (err, response) {
+                    if (err) {
+                        res.json(err);
+                    } else {
+                        res.json(response);
+                    }
+
+                    mongoclient.close();
+                });
+            })
         })
-    })
+    });
 });
 
 app.get('/api', function (req, res) {
@@ -129,3 +146,26 @@ app.delete('/api/:id', function (req, res) {
         })
     })
 });
+
+function getDateTime() {
+    let date = new Date();
+    
+    let hour = date.getHours();
+    hour = (hour < 10 ? "0" : "") + hour; 
+    
+    let min  = date.getMinutes();
+    min = (min < 10 ? "0" : "") + min;
+    
+    let sec  = date.getSeconds();
+    sec = (sec < 10 ? "0" : "") + sec;
+    
+    let year = date.getFullYear();
+    
+    let month = date.getMonth() + 1;
+    month = (month < 10 ? "0" : "") + month;
+    
+    let day  = date.getDate();
+    day = (day < 10 ? "0" : "") + day;
+    
+    return `hora-${hour}-${min}-${sec}-dia-${day}-${month}-${year}-`;
+}
