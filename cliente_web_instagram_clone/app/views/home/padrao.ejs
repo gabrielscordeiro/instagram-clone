@@ -32,9 +32,33 @@
 								'<div class="publicacao">' + 
 									'<span class="titulo">' + data[i].titulo + '</span>' +
 									'<img src="http://localhost:8080/imagens/'+ data[i].urlImagem + '"/>' + 
+									'<div class="comentar">'+
+										'<input type="text" class="form-control input_comentario" id="postagem_'+ data[i]._id +'" placeholder="Adicione um comentário"/>'+
+										'<button class="btn btn-default btn_postagem" value="'+ data[i]._id +'" type="button">Comentar</button>' +
+									'</div>'+
 								'</div>'
 							)
 						}
+
+						$('.btn_postagem').on('click', function(){
+							var id = this.value;
+							var idInputComentario = '#postagem_' + id;
+							var comentario = $(idInputComentario).val();
+
+							var xhr = new XMLHttpRequest();
+
+							xhr.open('PUT', 'http://localhost:8080/api/' + id);
+							xhr.setRequestHeader('Content-Type','application/json');
+
+							xhr.onload = function(){
+								if(xhr.status == 200){
+									window.location.href = '/home';
+								}
+							}
+
+							xhr.send(JSON.stringify({comentario: comentario}));
+							
+						});
 					}
 				}
 

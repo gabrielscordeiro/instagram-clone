@@ -12,10 +12,18 @@ app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json());
 app.use(multiparty());
 
+app.use(function(req, res, next){
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
+    res.setHeader('Access-Control-Allow-Headers', 'content-type');
+    res.setHeader('Access-Control-Allow-Credentials', true);
+
+    next();
+});
+
 const port = 8080;
 
 app.listen(port);
-
 
 const db = new mongodb.Db(
     'instagram',
@@ -34,8 +42,6 @@ app.get('/', function (req, res) {
 
 app.post('/api', function (req, res) {
     //res.setHeader('Access-Control-Allow-Origin', 'http://localhost:8000');
-    res.setHeader('Access-Control-Allow-Origin', '*');
-
     let files = req.files;
 
     let pathOrigem = files.arquivo.path;
@@ -55,8 +61,6 @@ app.post('/api', function (req, res) {
             titulo: req.body.titulo
         }
 
-        console.log(dados);
-
         db.open(function (err, mongoclient) {
             mongoclient.collection('postagens', function (err, collection) {
                 collection.insert(dados, function (err, response) {
@@ -74,8 +78,6 @@ app.post('/api', function (req, res) {
 });
 
 app.get('/api', function (req, res) {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-
     db.open(function (err, mongoclient) {
         mongoclient.collection('postagens', function (err, collection) {
             collection.find().toArray(function (err, response) {
@@ -132,8 +134,11 @@ app.put('/api/:id', function (req, res) {
             collection.update({
                 _id: objectId(req.params.id)
             }, {
-                    $set: {
-                        titulo: req.body.titulo
+                    $push: {//inclui um elemento dentro de um conjunto de arrays, não atualiza o conteúdo, somente incluí
+                        comentarios:{
+                            id_comentario: new objectId(),
+                            comentario: req.body.comentario
+                        }
                     }
                 }, {},
                 function (err, response) {
